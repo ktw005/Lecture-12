@@ -1,0 +1,54 @@
+---
+title: "Lecture 12"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Inspecting input structure
+```{r get pdb}
+library(bio3d)
+file.name <- get.pdb("1hsg")
+hiv <- read.pdb(file.name)
+```
+
+
+## Prepare separate protein and ligand files
+```{r separate}
+prot <- trim.pdb(hiv, "protein")
+lig <- trim.pdb(hiv, "ligand")
+
+write.pdb(prot, file="1hsg_protein.pdb")
+write.pdb(lig, "1hsg_ligand.pdb")
+```
+
+## Inspect docking results
+
+```{r }
+res <- read.pdb("all.pdbqt", multi=TRUE)
+
+write.pdb(res, "results.pdb")
+
+ori <- read.pdb("1hsg_ligand.pdbqt")
+
+rmsd(ori, res)
+```
+
+## RMSD, no hydrogen
+```{r noh}
+ori_noh <- trim.pdb(ori, "noh")
+res_noh <- trim.pdb(res, "noh")
+
+rmsd(ori_noh, res_noh)
+```
+
+## Alternate RMSD, no hydrogen method
+```{r}
+ins <- atom.select(ori, "noh")
+ins_res <- atom.select(res, "noh")
+
+rmsd(ori$xyz[, ins$xyz], res$xyz[, ins_res$xyz])
+```
+
